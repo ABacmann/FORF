@@ -1,0 +1,6 @@
+[2024-07-07 19:37:56,468][__main__][CRITICAL] - Prediction failed due to [Errno 2] No such file or directory: 'C:\\Users\\Administrator\\Projects\\FORF\\lama\\big-lama\\models\\best.ckpt\\config.yaml':
+Traceback (most recent call last):
+  File "C:\Users\Administrator\Projects\FORF\lama\bin\predict.py", line 48, in main
+    with open(train_config_path, 'r') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\Administrator\\Projects\\FORF\\lama\\big-lama\\models\\best.ckpt\\config.yaml'
+

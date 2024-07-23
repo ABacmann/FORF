@@ -1,0 +1,5 @@
+- refine=True
+- model.path=C:\Users\Administrator\Projects\FORF\lama\models\fine-tuned-big-lama
+- model.checkpoint=fine-tuned-epoch12.ckpt
+- indir=C:\Users\Administrator\Projects\FORF\Data\LaMa_Medical_Images
+- outdir=C:\Users\Administrator\Projects\FORF\Data\Results\Inpainted_Images

@@ -1,0 +1,9 @@
+data_root_dir: C:/Users/Administrator/Projects/LamaInpainting/lama/medical_dataset
+out_root_dir: C:/Users/Administrator/Projects/LamaInpainting/lama/experiments
+tb_dir: C:/Users/Administrator/Projects/LamaInpainting/lama/tb_logs
+load_checkpoint_path: C:/Users/Administrator/Projects/LamaInpainting/lama/big-lama1/models/best.ckpt
+
+trainer:
+  kwargs:
+    gpus: 0
+    accelerator: 'ddp_cpu'

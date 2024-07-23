@@ -1,0 +1,7 @@
+{
+    "sam_ckpt_path": "C:/Users/Administrator/Projects/FORF/Inpaint-Anything/pretrained_models/sam_vit_h_4b8939.pth",
+    "sam_segment_script": "C:/Users/Administrator/Projects/FORF/Inpaint-Anything/sam_segment.py",
+    "sam_model_type": "vit_h",
+    "dilate_kernel_size": 15,
+    "point_labels": 1
+}
