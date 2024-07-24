@@ -3,6 +3,7 @@ import shutil
 from tkinter import filedialog, simpledialog, Tk, messagebox, Toplevel, Label, Button, Frame
 from PIL import Image, ImageTk
 import cv2
+from pathlib import Path
 from framework.inpainting_pipeline import InpaintingManager
 from framework.models.Big_Lama_Fourier import BigLamaModel, FineTunedLamaModel, FineTunedLamaModel2
 from framework.models.trivial_removal import process_image_with_mask
@@ -20,18 +21,6 @@ config = Config('framework/mask_generator/config.json')
 class FileHandler:
     @staticmethod
     def create_output_directory(base_dir, sub_dir):
-        """
-        Creates a sub-directory within the given base directory.
-        If the sub-directory already exists, it prints a message indicating so.
-        Otherwise, it creates the sub-directory and prints a confirmation message.
-
-        Parameters:
-        - base_dir (str): The base directory where the sub-directory will be created.
-        - sub_dir (str): The name of the sub-directory to be created.
-
-        Returns:
-        - str: The path to the created (or existing) sub-directory.
-        """
         output_dir = os.path.join(base_dir, sub_dir)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -42,17 +31,6 @@ class FileHandler:
 
     @staticmethod
     def setup_output_directories(base_output_dir):
-        """
-        Sets up the necessary output directories for masks, inpainted images, and ground truth.
-        Creates sub-directories named 'Masks', 'Inpainted_Images', and 'Ground_Truth' within
-        the provided base output directory.
-
-        Parameters:
-        - base_output_dir (str): The base directory where the sub-directories will be created.
-
-        Returns:
-        - tuple: A tuple containing paths to the 'Masks', 'Inpainted_Images', and 'Ground_Truth' directories.
-        """
         mask_output_dir = FileHandler.create_output_directory(base_output_dir, "Masks")
         inpaint_output_dir = FileHandler.create_output_directory(base_output_dir, "Inpainted_Images")
         final_input_dir = FileHandler.create_output_directory(base_output_dir, "Ground_Truth")
@@ -60,19 +38,6 @@ class FileHandler:
 
     @staticmethod
     def choose_files_or_folder(root, image_paths):
-        """
-        Opens a selection window allowing the user to choose either specific image files or a folder containing images.
-        The selected files or images from the chosen folder are added to the provided image_paths list.
-        The selection window has two buttons: one for selecting files and another for selecting a folder.
-
-        Parameters:
-        - root (Tk): The root window of the Tkinter application.
-        - image_paths (list): A list to which the selected file paths will be appended.
-
-        Returns:
-        - None
-        """
-
         def select_files():
             files = filedialog.askopenfilenames(
                 filetypes=[("Image files", "*.jpg *.jpeg *.png *.dcm"), ("All files", "*.*")])
@@ -101,27 +66,23 @@ class FileHandler:
         selection_window.mainloop()
 
     @staticmethod
-    def convert_dicom_to_png(image_paths, final_input_dir):
-        """
-        Converts DICOM files to PNG format and appends the converted file paths to a new list.
-
-        Parameters:
-        - image_paths (list): A list of paths to the images (including DICOM files) to be processed.
-        - final_input_dir (str): The directory where the converted PNG files will be saved.
-
-        Returns:
-        - list: A list of paths to the converted PNG files.
-        """
+    def convert_images_to_png(image_paths, final_input_dir):
         png_paths = []
         for image_path in image_paths:
-            if image_path.endswith('.dcm'):
-                base_name = os.path.basename(image_path)
-                name, _ = os.path.splitext(base_name)
-                png_path = os.path.join(final_input_dir, f"{name}.png")
+            base_name = os.path.basename(image_path)
+            name, _ = os.path.splitext(base_name)
+            png_path = os.path.join(final_input_dir, f"{name}.png")
+
+            if image_path.lower().endswith('.dcm'):
                 dicom_to_png(image_path, png_path)
+                png_paths.append(png_path)
+            elif image_path.lower().endswith(('.jpg', '.jpeg')):
+                img = Image.open(image_path)
+                img.save(png_path)
                 png_paths.append(png_path)
             else:
                 png_paths.append(image_path)
+
         return png_paths
 
 
@@ -246,12 +207,14 @@ class InpaintingHandler:
         - None
         """
         print(f"Processing single image: {image_path}")
-        destination_path = os.path.join(final_input_dir, os.path.basename(image_path))
-        if image_path != destination_path:
+
+        # Ensure the source and destination are not the same file
+        destination_path = Path(final_input_dir) / Path(image_path).name
+        if Path(image_path).resolve() == destination_path.resolve():
+            print(f"Source and destination are the same file: {image_path}. Skipping copy.")
+        else:
             shutil.copy(image_path, final_input_dir)
             print(f"Copied image to final input dir: {final_input_dir}")
-        else:
-            print(f"Image already in final input dir: {final_input_dir}")
 
         base_name = os.path.basename(image_path)
         name, ext = os.path.splitext(base_name)
@@ -565,8 +528,8 @@ def run_pipeline():
         base_output_dir = filedialog.askdirectory(title="Select Folder to Save Results")
         mask_output_dir, inpaint_output_dir, final_input_dir = FileHandler.setup_output_directories(base_output_dir)
 
-        # Convert DICOM files to PNG if needed
-        image_paths = FileHandler.convert_dicom_to_png(image_paths, final_input_dir)
+        # Convert images (DICOM, JPEG, JPG) to PNG
+        image_paths = FileHandler.convert_images_to_png(image_paths, final_input_dir)
 
         # Determine if masks need to be created
         if len(image_paths) > 1:  # Multiple images selected
