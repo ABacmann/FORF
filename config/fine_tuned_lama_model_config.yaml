@@ -1,0 +1,3 @@
+model_dir: C:\Users\Administrator\Projects\FORF\lama\models\fine-tuned-big-lama
+config_path: C:\Users\Administrator\Projects\FORF\lama\models\fine-tuned-big-lama\config.yaml
+checkpoint: fine-tuned-epoch12.ckpt

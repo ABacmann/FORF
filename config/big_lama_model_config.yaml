@@ -1,0 +1,3 @@
+model_dir: C:\Users\Administrator\Projects\FORF\lama\models\big-lama
+config_path: C:\Users\Administrator\Projects\FORF\lama\models\big-lama\config.yaml
+checkpoint: best.ckpt

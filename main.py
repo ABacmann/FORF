@@ -393,15 +393,14 @@ class PipelineManager:
         if selected_model_name == 'DeepFillV2':
             return DeepFillV2()
         elif selected_model_name == 'BigLamaModel':
-            return BigLamaModel(torch_home=r'C:\Users\Administrator\Projects\FORF\lama')
+            return BigLamaModel(torch_home=os.getenv('TORCH_HOME'))
         elif selected_model_name == 'FineTunedLamaModel':
-            return FineTunedLamaModel(torch_home=r'C:\Users\Administrator\Projects\FORF\lama')
+            return FineTunedLamaModel(torch_home=os.getenv('TORCH_HOME'))
         elif selected_model_name == 'FineTunedLamaModel2':
-            return FineTunedLamaModel2(torch_home=r'C:\Users\Administrator\Projects\FORF\lama')
+            return FineTunedLamaModel2(torch_home=os.getenv('TORCH_HOME'))
         else:
             print(f"Unknown model selected: {selected_model_name}")
             return None
-
     @staticmethod
     def select_removal_method(root):
         """
