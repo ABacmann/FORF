@@ -1,6 +1,16 @@
 import os
 import subprocess
 import sys
+import yaml
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+load_dotenv(dotenv_path="C:/Users/Administrator/Projects/FORF/config/.env")
+
+
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        return yaml.safe_load(file)
 
 
 class BaseBigLamaModel:
@@ -29,7 +39,7 @@ class BaseBigLamaModel:
 
         predict_command = [
             sys.executable, os.path.join(self.torch_home, 'bin', 'predict.py'),
-            #f'refine={True}', # Set True to activate the Refinement feature from Kulshreshtha et al.
+            # f'refine={True}', # Set True to activate the Refinement feature from Kulshreshtha et al.
             f'model.path={self.model_dir}',
             f'model.checkpoint={self.checkpoint}',
             f'indir={self.indir}',
@@ -41,26 +51,20 @@ class BaseBigLamaModel:
 
 class BigLamaModel(BaseBigLamaModel):
     def __init__(self, torch_home=None):
-        model_dir = r'C:\Users\Administrator\Projects\FORF\lama\models\big-lama'
-        config_path = os.path.join(model_dir, 'config.yaml')
-        checkpoint = 'best.ckpt'
-        super().__init__(model_dir, config_path, checkpoint, torch_home)
+        config = load_config(os.getenv('BIG_LAMA_MODEL_CONFIG'))
+        super().__init__(config['model_dir'], config['config_path'], config['checkpoint'], torch_home)
 
 
 class FineTunedLamaModel(BaseBigLamaModel):
     def __init__(self, torch_home=None):
-        model_dir = r'C:\Users\Administrator\Projects\FORF\lama\models\fine-tuned-big-lama'
-        config_path = os.path.join(model_dir, 'config.yaml')
-        checkpoint = 'fine-tuned-epoch12.ckpt'
-        super().__init__(model_dir, config_path, checkpoint, torch_home)
+        config = load_config(os.getenv('FINE_TUNED_LAMA_MODEL_CONFIG'))
+        super().__init__(config['model_dir'], config['config_path'], config['checkpoint'], torch_home)
 
 
 class FineTunedLamaModel2(BaseBigLamaModel):
     def __init__(self, torch_home=None):
-        model_dir = r'C:\Users\Administrator\Projects\FORF\lama\models\fine-tuned2-big-lama'
-        config_path = os.path.join(model_dir, 'config.yaml')
-        checkpoint = 'fine-tuned2-epoch13.ckpt'
-        super().__init__(model_dir, config_path, checkpoint, torch_home)
+        config = load_config(os.getenv('FINE_TUNED_LAMA_MODEL2_CONFIG'))
+        super().__init__(config['model_dir'], config['config_path'], config['checkpoint'], torch_home)
 
 
 if __name__ == "__main__":
@@ -85,3 +89,5 @@ if __name__ == "__main__":
 
     # Run prediction
     model.run_prediction()
+
+
