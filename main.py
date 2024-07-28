@@ -397,7 +397,7 @@ class PipelineManager:
         return selected_method[0]
 
     @staticmethod
-    def manage_multiple_images_with_masks(root, image_paths, mask_output_dir, final_input_dir):
+    def manage_multiple_images_without_masks(root, image_paths, mask_output_dir, final_input_dir):
         """
         Manages the processing of multiple images with masks by selecting a mask generation method
         and processing each image accordingly.
@@ -418,7 +418,7 @@ class PipelineManager:
         InpaintingHandler.process_multiple_images(image_paths, mask_output_dir, final_input_dir, mask_method)
 
     @staticmethod
-    def manage_multiple_images_without_masks(image_paths, final_input_dir):
+    def manage_multiple_images_with_masks(image_paths, final_input_dir):
         """
         Manages the processing of multiple images without generating masks.
         Copies the images and their corresponding masks (if they exist) to the final input directory.
@@ -431,12 +431,23 @@ class PipelineManager:
         - None
         """
         for image_path in image_paths:
-            shutil.copy(image_path, final_input_dir)
+            destination_path = Path(final_input_dir) / Path(image_path).name
+            if Path(image_path).resolve() == destination_path.resolve():
+                print(f"Source and destination are the same file: {image_path}. Skipping copy.")
+            else:
+                shutil.copy(image_path, final_input_dir)
+                print(f"Copied image to final input dir: {final_input_dir}")
+
             base_name = os.path.basename(image_path)
             name, ext = os.path.splitext(base_name)
             mask_path = os.path.join(os.path.dirname(image_path), f"{name}_mask.png")
             if os.path.exists(mask_path):
-                shutil.copy(mask_path, final_input_dir)
+                destination_mask_path = Path(final_input_dir) / Path(mask_path).name
+                if Path(mask_path).resolve() == destination_mask_path.resolve():
+                    print(f"Source and destination for mask are the same file: {mask_path}. Skipping copy.")
+                else:
+                    shutil.copy(mask_path, final_input_dir)
+                    print(f"Copied mask to final input dir: {final_input_dir}")
             else:
                 print(f"No mask found for {image_path}")
 
@@ -537,9 +548,9 @@ def run_pipeline():
             PipelineManager.ask_yes_no_question(root, "Do you want to create masks?", create_masks_choice)
             create_masks = create_masks_choice[0].lower()
             if create_masks == 'yes':
-                PipelineManager.manage_multiple_images_with_masks(root, image_paths, mask_output_dir, final_input_dir)
+                PipelineManager.manage_multiple_images_without_masks(root, image_paths, mask_output_dir, final_input_dir)
             else:
-                PipelineManager.manage_multiple_images_without_masks(image_paths, final_input_dir)
+                PipelineManager.manage_multiple_images_with_masks(image_paths, final_input_dir)
         else:  # Single image selected
             PipelineManager.manage_single_image(root, image_paths, mask_output_dir, final_input_dir)
 
